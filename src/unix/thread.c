@@ -34,6 +34,7 @@
 #include <unistd.h>  /* getpagesize() */
 
 #include <limits.h>
+#include <stdint.h>  /* SIZE_MAX */
 
 #ifdef __MVS__
 #include <sys/ipc.h>
@@ -160,6 +161,8 @@ int uv_thread_create_ex(uv_thread_t* tid,
     stack_size = uv__thread_stack_size();
   } else {
     pagesize = (size_t)getpagesize();
+    if (stack_size > SIZE_MAX - pagesize + 1)
+      return UV_EINVAL;
     /* Round up to the nearest page boundary. */
     stack_size = (stack_size + pagesize - 1) &~ (pagesize - 1);
     min_stack_size = uv__min_stack_size();

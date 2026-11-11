@@ -23,6 +23,7 @@
 #include "task.h"
 
 #include <stdio.h>
+#include <stdint.h>  /* SIZE_MAX */
 #include <stdlib.h>
 #include <string.h> /* memset */
 
@@ -291,6 +292,13 @@ TEST_IMPL(thread_stack_size_explicit) {
   ASSERT_OK(uv_thread_create_ex(&thread, &options,
                                 thread_check_stack, &options));
   ASSERT_OK(uv_thread_join(&thread));
+
+#ifndef _WIN32
+  options.stack_size = SIZE_MAX;
+  ASSERT_EQ(UV_EINVAL,
+            uv_thread_create_ex(&thread, &options,
+                                thread_check_stack, &options));
+#endif
 
   return 0;
 }
